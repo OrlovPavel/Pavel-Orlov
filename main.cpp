@@ -40,7 +40,7 @@ public:
 int main() {
     char query;
     MyQueue queue;
-    int n, i;
+    int n, i;// Желательно сразу инициализировать переменные, хотя бы простые
     std::cin >> n;
     for(int j = 0; j < n; ++j){
         std:: cin >> query;
