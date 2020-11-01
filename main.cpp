@@ -7,6 +7,7 @@ private:
         int value;
         stackCell *previous;
     };
+    
     stackCell *top;
     int size;
 public:
@@ -14,12 +15,14 @@ public:
         this->top = nullptr;
         this->size = 0;
     }
+    
     bool isEmpty(){
         if(this->size == 0) {
             return true;
         }
         return false;
     }
+    
     void push(int value){
         stackCell *newTop = new stackCell();
         newTop->value = value;
@@ -27,6 +30,7 @@ public:
         this->top = newTop;
         this->size++;
     }
+    
     void pop(){
         if(this->isEmpty()) {
             return;
@@ -36,15 +40,18 @@ public:
         delete deletableTop;
         this->size--;
     }
+    
     int getTopValue(){
         if(this->isEmpty()) {
             return -1;
         }
         return this->top->value;
     }
+    
     int getSize(){
         return this->size;
     }
+    
     void clear(){
         while(this->size != 0){
             this->pop();
