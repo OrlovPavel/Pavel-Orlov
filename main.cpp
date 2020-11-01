@@ -47,13 +47,11 @@ public:
         heap.pop_back();
         siftDown(1);
     }
-    void extractMax(long long value){
+    void extractMax(long long value){// Мне кажется смысл этой функции не вытаскивание элемента, а замена, что было бы логичнее
         heap[1] = value;
         siftDown(1);
     }
 };
-
-
 
 
 int main() {
@@ -61,6 +59,7 @@ int main() {
     long long x;
     scanf("%d%d", &n, &k);
     MyHeap heap(k);
+    
     for(int i = 0; i < k; ++i){
         scanf("%d", &x);
         heap.insert(x);
@@ -71,7 +70,8 @@ int main() {
             heap.extractMax(x);
         }
     }
-    int *a = (int*)calloc(k, sizeof(int));
+    
+    int *a = (int*)calloc(k, sizeof(int));// Аналогично, где освобождение памяти
     for(int i = 0; i < k; ++i){
         a[i] = heap.getMax();
         heap.extractMax();
