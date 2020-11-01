@@ -15,7 +15,8 @@ public:
         heap.push_back(p);
         heap_size = 0;
     }
-    void siftUp(int i){
+    
+    void siftUp(int i){// Всё тоже - названия переменных
         while(i > 1 && heap[i] < heap[i / 2]){
             ptrs[heap[i].second] = i / 2;
             ptrs[heap[i / 2].second] = i;
@@ -23,6 +24,7 @@ public:
             i /= 2;
         }
     }
+    
     void siftDown(int i){
         while(2 * i <= heap_size){
             int j = -1;
@@ -43,6 +45,7 @@ public:
             }
         }
     }
+    
     void insert(long long x, int ptr = 0){
         p.first = x; p.second = ptr;
         heap.push_back(p);
@@ -50,9 +53,11 @@ public:
         ptrs[ptr] = heap_size;
         siftUp(heap_size);
     }
+    
     long long getMin(){
         return heap[1].first;
     }
+    
     void extractMin(){
         ptrs[heap[1].second] = 0;
         heap[1] = heap[heap_size];
@@ -61,6 +66,7 @@ public:
         heap_size--;
         siftDown(1);
     }
+    
     void decreaseKey(int ptr, long long value){
         heap[ptrs[ptr]].first -= value;
         siftUp(ptrs[ptr]);
@@ -71,10 +77,12 @@ int main() {
     std::ios::sync_with_stdio(0);
     std::cin.tie(0);
     std::cout.tie(0);
+    
     MyHeap heap;
     std::string query;
     int q, j;
     long long x;
+    
     std::cin >> q;
     for(int i = 0; i < q; ++i){
         std::cin >> query;
