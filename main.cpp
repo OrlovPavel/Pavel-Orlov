@@ -33,8 +33,8 @@ void stableSort(lld* a, int n, lld *copy, int *digits, int k){
 }
 
 void LSDsort(lld *a, int n){
-    int *digits = (int*)calloc(10, sizeof(int));
-    lld *copy = (lld*)calloc(n, sizeof(lld));
+    int *digits = (int*)calloc(10, sizeof(int));// доделай освобождение памяти
+    lld *copy = (lld*)calloc(n, sizeof(lld));// И тут
     int k = 1;
     while(k < 20){
         stableSort(a, n, copy, digits, k);
@@ -48,7 +48,7 @@ void LSDsort(lld *a, int n){
 int main() {
     int n;
     scanf("%d", &n);
-    lld *a = (lld*)calloc(n, sizeof(lld));
+    lld *a = (lld*)calloc(n, sizeof(lld));// И тут
     for(int i = 0; i < n; ++i){
         scanf("%llu", &a[i]);
     }
