@@ -41,9 +41,10 @@ int findKstat(int *array, int n, int find){
 int main() {
     int n, k;
     scanf("%d%d", &n, &k);
-    int *array = (int*)calloc(n, sizeof(int));// А где освобождение массива? Да, даже в конце программы
+    int *array = (int*)calloc(n, sizeof(int));
     for(int i = 0; i < n; ++i)
         scanf("%d", &array[i]);
     printf("%d", findKstat(array, n, k));
+    free(array);
     return 0;
 }
