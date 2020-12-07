@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <ctime>
 
+
+
 int particion(int *array, int l, int r){
     int i = l, j = r, p = array[(r + l) / 2];
     while(i <= j){
