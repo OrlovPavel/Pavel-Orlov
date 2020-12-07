@@ -47,7 +47,7 @@ public:
         heap.pop_back();
         siftDown(1);
     }
-    void extractMax(long long value){
+    void extractMax(long long value){ // Довольно странное название для функции, которая по факту и не убирает максимум, а заменяет его
         heap[1] = value;
         siftDown(1);
     }
