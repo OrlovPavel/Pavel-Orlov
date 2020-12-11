@@ -7,6 +7,7 @@ private:
     SplayTree* left = nullptr;
     SplayTree* right = nullptr;
     long long sum = 0;
+    
     void setSum(){
         if(isEmpty)
             return;
@@ -14,7 +15,9 @@ private:
         sum += left->sum;
         sum += right->sum;
     }
+    
     void splay(int x, bool isRoot = true){
+        // Прям здесь поиск? Ну ладно
         if(left && x < key)
             left->splay(x, false);
         if(right && x > key)
@@ -90,7 +93,7 @@ private:
         return res;
     }
     void create(int x){
-        isEmpty = false;
+        isEmpty = false;//Зачем?? Всё равно при удалении... а хотя его тут нет
         key = x;
         sum = key;
         left = new SplayTree();
