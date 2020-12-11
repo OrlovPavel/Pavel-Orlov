@@ -8,6 +8,7 @@ class Sets{
 private:
     std::map<int, std::set<long long> > sets;
     std::map<long long, std::set<int>> elements;
+    
 public:
     void add(long long element, int pos){
         sets[pos].insert(element);
