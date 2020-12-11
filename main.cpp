@@ -23,6 +23,8 @@ private:
         if(right && right->height + 1 > height)
             height = right->height + 1;
     }
+    
+    
     void setSons(){
         if(isEmpty)
             return;
