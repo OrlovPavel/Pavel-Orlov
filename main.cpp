@@ -8,6 +8,7 @@ private:
     int sonsCount = 0;
     AVLTree *left = nullptr;
     AVLTree *right = nullptr;
+    
     int diff(){
         int l = 0, r = 0;
         if(left)
@@ -16,6 +17,7 @@ private:
             r = right->height;
         return l - r;
     }
+    
     void setHeight(){
         height = 0;
         if(left)
@@ -23,7 +25,8 @@ private:
         if(right && right->height + 1 > height)
             height = right->height + 1;
     }
-    void setSons(){
+    
+    void setSons(){//лучше size, понятнее
         if(isEmpty)
             return;
         sonsCount = 1;
@@ -32,6 +35,7 @@ private:
         if(right)
             sonsCount += right->sonsCount;
     }
+    
     void smallLeftRotate(){
         AVLTree root = *right;
         *right = *root.left;
@@ -79,7 +83,7 @@ private:
                 bigRightRotate();
         }
     }
-    void create(int new_key){
+    void create(int new_key){// Это типа конструктор? А если удалить всё до корня то почему isEmpty на True не меняется?
         isEmpty = false;
         key = new_key;
         AVLTree *l = new AVLTree();
@@ -95,6 +99,7 @@ private:
     void delMin(){
         if(left->isEmpty){
             *this = *right;
+            //тут только ссылки переделываются, а требуется ещё удалить забытый элемент. Поправь
         }
         else{
             left->delMin();
@@ -136,6 +141,7 @@ public:
         if(del_key == key){
             if(right->isEmpty){
                 *this = *left;
+                //Аналогично, следует ещё удалить элемент
             }
             else{
                 this->key = right->findMin();
