@@ -7,7 +7,6 @@ private:
     SplayTree* left = nullptr;
     SplayTree* right = nullptr;
     long long sum = 0;
-    
     void setSum(){
         if(isEmpty)
             return;
@@ -15,9 +14,7 @@ private:
         sum += left->sum;
         sum += right->sum;
     }
-    
     void splay(int x, bool isRoot = true){
-        // Прям здесь поиск? Ну ладно
         if(left && x < key)
             left->splay(x, false);
         if(right && x > key)
@@ -52,6 +49,7 @@ private:
         *right = *root.left;
         *root.left = *this;
         *this = root;
+        root.isEmpty = true; //чтобы при удалении root он не полез в его сыновей, которые на самом деле удалять не нужно
         left->setSum();
         setSum();
     }
@@ -60,40 +58,45 @@ private:
         *left = *root.right;
         *root.right = *this;
         *this = root;
+        root.isEmpty = true; //чтобы при удалении root он не полез в его сыновей, которые на самом деле удалять не нужно
         right->setSum();
         setSum();
     }
-    void merge(SplayTree tree){
+    void merge(SplayTree* tree){
         splay(findMax());
-        *right = tree;
+        if(right)
+            *right = *tree;
+        else{
+            right = new SplayTree();
+            *right = *tree;
+        }
         this->setSum();
     }
-    std::pair<SplayTree,SplayTree> split(int x){ // в певром дереве все < x, во втором >= x
+    std::pair<SplayTree*,SplayTree*> split(int x){ // в певром дереве все < x, во втором >= x
         int border = next(x);
-        std::pair<SplayTree,SplayTree> res;
+        std::pair<SplayTree*,SplayTree*> res;
+        res.first = new SplayTree();
+        res.second = new SplayTree();
         if(border == 1000000009) {
             splay(findMax());
             //print();std::cout <<"\n";
-            res.first = *this;
-            res.second = *(new SplayTree());
+            *res.first = *this;
         }
         else {
             //std::cout << border;
             splay(border);
             //print();std::cout <<"\n";
             if (left)
-                res.first = *left;
-            else
-                res.first = *(new SplayTree());
-            res.second = *this;
-            if(!res.second.isEmpty)
-                res.second.left = new SplayTree();
-            res.second.setSum();
+                *res.first = *left;
+            *res.second = *this;
+            if(!res.second->isEmpty)
+                res.second->left = new SplayTree();
+            res.second->setSum();
         }
         return res;
     }
     void create(int x){
-        isEmpty = false;//Зачем?? Всё равно при удалении... а хотя его тут нет
+        isEmpty = false;
         key = x;
         sum = key;
         left = new SplayTree();
@@ -124,25 +127,31 @@ public:
     void add(int x){
         if(x == 0)
             return;
-        std::pair<SplayTree,SplayTree> splited = split(x);
-        if(!splited.second.isEmpty && splited.second.key == x){
-            *this = splited.first;
+        std::pair<SplayTree*,SplayTree*> splited = split(x);
+        if(!splited.second->isEmpty && splited.second->key == x){
+            *this = *splited.first;
             merge(splited.second);
+            splited.first->isEmpty = true; // та же причина что и в поворотах
+            splited.second->isEmpty = true; //
             splay(x);
         }
         else{
             create(x);
-            *left = splited.first;
-            *right = splited.second;
+            *left = *splited.first;
+            *right = *splited.second;
+            splited.first->isEmpty = true; // та же причина что и в поворотах
+            splited.second->isEmpty = true; //
             setSum();
         }
     }
     long long summ(int l, int r){
         long long res = 0;
-        //splay(next(r + 1));
-        res += split(r + 1).first.sum;
-        //splay(next(l));
-        res -= split(l).first.sum;
+        std::pair<SplayTree*,SplayTree*> splited1 = split(r + 1);
+        res += splited1.first->sum;
+        std::pair<SplayTree*,SplayTree*> splited2 = split(l);
+        res -= splited2.first->sum;
+        splited1.first->isEmpty = true; splited2.first->isEmpty = true;
+        splited1.second->isEmpty = true; splited2.first->isEmpty = true;
         return res;
     }
     int findMax(){
@@ -185,6 +194,12 @@ public:
             else{
                 return std::min(left->next(left_border), key);
             }
+        }
+    }
+    ~SplayTree(){
+        if(!isEmpty){
+            delete left;
+            delete right;
         }
     }
 };
