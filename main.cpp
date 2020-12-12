@@ -5,10 +5,8 @@ private:
     bool isEmpty = true;
     int key = 0;
     int height = 0;
-    int sonsCount = 0;
     AVLTree *left = nullptr;
     AVLTree *right = nullptr;
-    
     int diff(){
         int l = 0, r = 0;
         if(left)
@@ -17,7 +15,6 @@ private:
             r = right->height;
         return l - r;
     }
-    
     void setHeight(){
         height = 0;
         if(left)
@@ -25,36 +22,23 @@ private:
         if(right && right->height + 1 > height)
             height = right->height + 1;
     }
-    
-    void setSons(){//лучше size, понятнее
-        if(isEmpty)
-            return;
-        sonsCount = 1;
-        if(left)
-            sonsCount += left->sonsCount;
-        if(right)
-            sonsCount += right->sonsCount;
-    }
-    
     void smallLeftRotate(){
         AVLTree root = *right;
         *right = *root.left;
         *root.left = *this;
         *this = root;
+        root.isEmpty = true; //чтобы при удалении root он не полез в его сыновей, которые на самом деле удалять не нужно, потому что они еще используются
         this->left->setHeight();
-        this->left->setSons();
         this->setHeight();
-        this->setSons();
     }
     void smallRightRotate(){
         AVLTree root = *left;
         *left = *root.right;
         *root.right = *this;
         *this = root;
+        root.isEmpty = true; //чтобы при удалении root он не полез в его сыновей, которые на самом деле удалять не нужно, потому что они еще используются
         this->right->setHeight();
-        this->right->setSons();
         this->setHeight();
-        this->setSons();
     }
     void bigLeftRotate(){
         right->smallRightRotate();
@@ -69,7 +53,6 @@ private:
         std::cout << left->height << "," << right->height << " left - " << left->diff();
         std::cout << std::endl;*/
         setHeight();
-        setSons();
         if(diff() == -2){
             if(right->diff() == -1 || right->diff() == 0)
                 smallLeftRotate();
@@ -83,12 +66,11 @@ private:
                 bigRightRotate();
         }
     }
-    void create(int new_key){// Это типа конструктор? А если удалить всё до корня то почему isEmpty на True не меняется?
+    void create(int new_key){
         isEmpty = false;
         key = new_key;
         AVLTree *l = new AVLTree();
         AVLTree *r = new AVLTree();
-        sonsCount = 1;
         left = l; right = r;
         setHeight();
     }
@@ -98,8 +80,8 @@ private:
     }
     void delMin(){
         if(left->isEmpty){
+            delete left;
             *this = *right;
-            //тут только ссылки переделываются, а требуется ещё удалить забытый элемент. Поправь
         }
         else{
             left->delMin();
@@ -108,7 +90,7 @@ private:
     }
 public:
     void print(){
-        std::cout << "(" << key << "," << sonsCount << ") ";
+        std::cout << key << " ";
         if(left){
             left->print();
         }
@@ -140,8 +122,8 @@ public:
         }
         if(del_key == key){
             if(right->isEmpty){
+                delete right;
                 *this = *left;
-                //Аналогично, следует ещё удалить элемент
             }
             else{
                 this->key = right->findMin();
@@ -166,7 +148,7 @@ public:
         if(isEmpty){
             return 1000000009;
         }
-        if(left_border > key){
+        if(left_border >= key){
             if(right->isEmpty)
                 return 1000000009;
             else
@@ -185,7 +167,7 @@ public:
         if(isEmpty){
             return -1000000009;
         }
-        if(right_border < key){
+        if(right_border <= key){
             if(left->isEmpty)
                 return -1000000009;
             else
@@ -198,27 +180,18 @@ public:
                 return std::max(right->prev(right_border), key);
         }
     }
-
-    int findKthMin(int k){
-        if(left->sonsCount + 1 == k){
-            return key;
+    ~AVLTree(){
+        if(!isEmpty){
+            delete left;
+            delete right;
         }
-        if(left->sonsCount + 1 > k){
-            return left->findKthMin(k);
-        }
-        if(left->sonsCount + 1 < k){
-            return right->findKthMin(k - left->sonsCount - 1);
-        }
-    }
-    int findKthMax(int k){
-        return findKthMin(sonsCount - k + 1);
     }
 };
 
 int main() {
-    //std::ios_base::sync_with_stdio(false);
-    //std::cin.tie(0);
-    //std::cout.tie(0);
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
+    std::cout.tie(0);
 
     std::string s; int key, res;
     AVLTree tree;
@@ -226,11 +199,11 @@ int main() {
         std::cin >> key;
         if(s[0] == 'i'){
             tree.insert(key);
-            tree.print(); std::cout << "\n";
+            //tree.print(); std::cout << "\n";
         }
         if(s[0] == 'd'){
             tree.erase(key);
-            tree.print(); std::cout << "\n";
+            //tree.print(); std::cout << "\n";
         }
         if(s[0] == 'e'){
             std::cout << (tree.exists(key)? "true" : "false") << "\n";
