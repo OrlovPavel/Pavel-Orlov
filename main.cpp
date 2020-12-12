@@ -7,6 +7,7 @@ private:
     SplayTree* left = nullptr;
     SplayTree* right = nullptr;
     long long sum = 0;
+    
     void setSum(){
         if(isEmpty)
             return;
