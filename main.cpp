@@ -181,7 +181,7 @@ public:
         }
     }
     ~AVLTree(){
-        if(!isEmpty){
+        if(!isEmpty){// Путано, но ок
             delete left;
             delete right;
         }
