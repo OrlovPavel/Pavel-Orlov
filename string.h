@@ -8,6 +8,7 @@ private:
     size_t size = 0;
     size_t maxSize = 0;
     char* str = nullptr;
+    
     void increaseMaxSize(){
         maxSize *= 2;
         char* copy = new char[maxSize];
@@ -22,6 +23,7 @@ private:
         delete[] str;
         str = copy;
     }
+    // Для обратного поиска это не оптимально, мы ведь не зря с обратной стороны пытаемся искать. Нужно отдельную функцию делать
     size_t find(const String& substr, bool right) const{
         if(substr.size > size)
             return size;
@@ -51,18 +53,18 @@ public:
     };
 
     String(size_t size, char c = '\0') : size(size), str(new char[size + 1]){
-        maxSize = size + 1;
+        maxSize = size + 1;// Лучше увеличиват в 2 раза
         memset(str, c, size);
     }
 
     String(const String& s): size(s.size), str(new char[size + 1]){
-        maxSize = size + 1;
+        maxSize = size + 1;//Аналогично
         memcpy(str, s.str, size);
     }
 
     String(const char* s) : String(){
         for(size_t i = 0; s[i] != '\0'; ++i){
-            push_back(s[i]);
+            push_back(s[i]);//Ась? Для этого есть memcpy, а str можно было бы и расширить до нужного размера
         }
     }
 
@@ -102,7 +104,7 @@ public:
     char& back(){
         if(size > 0)
             return str[size - 1];
-        return str[0];
+        return str[0];// то есть если размер равен 0, то вернёшь элемент, которого нет?
     }
 
     const char& back() const{
@@ -124,13 +126,13 @@ public:
     }
 
     size_t rfind(const String& substr) const{
-        return find(substr, 1);
+        return find(substr, 1);// Нужна отдельная реализация
     }
 
     String substr(size_t start, size_t count) const{
         String res(count);
         for(size_t i = start; i < count + start && i < size; ++i){
-            res[i - start] = str[i];
+            res[i - start] = str[i];// эффективнее было бы делать memcpy
         }
         return res;
     }
@@ -154,7 +156,8 @@ public:
 
     String& operator+=(const String& s){
         for(size_t i = 0; i < s.size; ++i){
-            push_back(s[i]);
+            push_back(s[i]);// Не, так не пойдёт, нужно сразу определяться, можно ли добавить строку такого размера и если нет, расшириться и добавить,
+            // или просто скопировать нужную часть
         }
         return *this;
     }
@@ -184,7 +187,7 @@ public:
         delete[] str;
     }
 };
-
+// А зачем 3, компилятор сам нормально перекастует типы как нужно
 String operator+(const char& c, const String& s){
     String res(1, c);
     res += s;
