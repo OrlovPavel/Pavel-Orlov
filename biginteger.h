@@ -9,7 +9,7 @@ class BigInteger{
 private:
     static const int rank = 10000;
     std::vector<int> digits;
-    bool sign = true;
+    bool sign = true;// is_positive
 
     static int mod(int a){
         return (rank + a % rank) % rank;
@@ -27,16 +27,20 @@ public:
     friend bool operator<(const BigInteger&, const BigInteger&);
     friend bool operator>=(const BigInteger&, const BigInteger&);
     friend std::istream& operator>>(std::istream&, BigInteger&);
+    // А их зачем friend, там всё равно скорее всего не используется ничего приватного
     friend BigInteger operator*(const BigInteger&,const BigInteger&);
     friend BigInteger operator+(const BigInteger&,const BigInteger&);
+    
     BigInteger() : sign(true){
         digits.push_back(0);
     }
-    BigInteger(const BigInteger& num) : sign(num.sign){
+    
+    BigInteger(const BigInteger& num) : sign(num.sign){// Для этого есть конструктор копирования у vector, уже всё давно реализовано
         for(auto it = num.digits.begin(); it != num.digits.end(); ++it){
             digits.push_back(*it);
         }
     }
+    
     BigInteger(int value){
         int cpy = value;
         sign = value >= 0;
@@ -59,11 +63,11 @@ public:
         std::swap(sign, num.sign);
     }
 
-
+    // А почему он принимает обычный BigInt, а не const &? Это ведь Копирование!!! Короче переделай
     BigInteger& operator+=(BigInteger num){
         int remainder = 0; int a;
-        if((sign ? *this:-*this) < (num.sign ? num:-num)){
-            swap(num);
+        if((sign ? *this:-*this) < (num.sign ? num:-num)){// И здесь тоже копирование при вызове -num
+            swap(num);// И это тоже нельзя
         }
         if(num.sign == sign) {
             for (size_t i = 0; i < digits.size(); ++i) {
@@ -95,11 +99,11 @@ public:
         return *this;
     }
 
-    void setZeros(){
+    void setZeros(){// Даже боюсь спрашивать...
         for(auto it = digits.begin(); it != digits.end(); ++it)
             *it = 0;
     }
-
+    
     BigInteger& operator*=(const BigInteger& num){
         BigInteger thisCopy = *this;
         int remainder = 0;
@@ -122,7 +126,7 @@ public:
     }
 
     BigInteger& operator-=(const BigInteger& num){
-        *this += -num;
+        *this += -num;// Тоже копирование, не катит
         return *this;
     }
 
@@ -159,7 +163,7 @@ public:
             res.digits.at(n) = 1;
         return res;
     }
-
+    // А ведь можно было просто (a*pow(10,precision)/num).toString и точку вставить, но ладно, так по идее быстрее, если явно считать
     std::string divide(const BigInteger& num, size_t presicion){
         std::string res = "";
         if(!*this || !num){
@@ -230,6 +234,7 @@ public:
     }
 
     BigInteger& operator%=(const BigInteger& x){
+        // this = this - (this/x)*x
         bool resSign = sign;
         BigInteger thisCopy = *this; thisCopy.sign = true;
         BigInteger num = x; num.sign = true;
@@ -280,6 +285,7 @@ public:
     explicit operator bool() const
     {
         return digits.at(digits.size() - 1) != 0;
+        // Лучше заодно проверить что массив из 1 элемента... так на всякий
     }
 
     BigInteger operator-() const {
@@ -288,11 +294,11 @@ public:
         return copy;
     }
 
-    bool getSign() const{
+    bool getSign() const{// Это метод должен быть private
         return sign;
     }
 
-    void setSign(bool s){
+    void setSign(bool s){// А этот так тем более. Для этой цели можно перегрузить *=-1
         sign = s;
     }
 
@@ -422,7 +428,7 @@ private:
     }
     void setSign(){
         if(numerator.getSign() == denumerator.getSign() || !numerator || !denumerator) {
-            numerator.setSign(true);
+            numerator.setSign(true);// *=-1
             denumerator.setSign(true);
         }
         else{
@@ -494,6 +500,7 @@ public:
             res << "/" << denumerator.toString();
         return res.str();
     }
+    // Как и в прошлый раз numerator*pow(10,precision)/denumerator. Причём у тебя уже реализована такая функция, зачем ещё раз и по другому?
     std::string asDecimal(size_t precision = 0) const{
         std::stringstream res;
         if(precision == 0){
