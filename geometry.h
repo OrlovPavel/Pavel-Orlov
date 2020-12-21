@@ -146,6 +146,7 @@ Line::Line(const Point& p, double k){ // y = kx + c, k = a, b = -1
 }
 
 bool Line::operator==(const Line& l) const{ // a1/a2=b1/b2=c1/c2 вырожденный сулчай 0=0 отдельно надо бы
+    // Не в это семестре, но такое должно проверяться в конструкторе а не здесь
     return isEqual(a * l.b, l.a * b) && isEqual(b * l.c, l.b * c) && isEqual(a * l.c, l.a * c);
 }
 
@@ -382,6 +383,7 @@ bool Polygon::isSimilarTo(const Shape& shape) const{
     return compare(another, false);
 }
 
+
 bool Polygon::containsPoint(const Point& point) const{ //луч параллельный оси ox вправо, point.x - левая граница
     Line ray(point, 0); Point a, b, c;
     for(size_t i = 0; i < points.size(); ++i){
@@ -492,7 +494,7 @@ std::pair<Line, Line> Rectangle::diagonals() const{
 class Ellipse: public Shape{
 protected:
     double a;
-    double b;
+    double b;// Хоть опиши кто это
     double c;
     Point F1;
     Point F2;
