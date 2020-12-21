@@ -93,6 +93,7 @@ int SparseTable::getAns(int l, int r) {
     return table[l][k].first;
 }
 
+
 int main() {
     int n, m;
     int l, r;
