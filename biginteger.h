@@ -9,7 +9,7 @@ class BigInteger{
 private:
     static const int rank = 10000;
     std::vector<int> digits;
-    bool sign = true;// is_positive
+    bool sign = true;
 
     static int mod(int a){
         return (rank + a % rank) % rank;
@@ -22,25 +22,19 @@ private:
                 break;
         }
     };
+    void setZeros(){
+        for(auto it = digits.begin(); it != digits.end(); ++it)
+            *it = 0;
+    }
 public:
     friend bool operator==(const BigInteger&, const BigInteger&);
     friend bool operator<(const BigInteger&, const BigInteger&);
     friend bool operator>=(const BigInteger&, const BigInteger&);
     friend std::istream& operator>>(std::istream&, BigInteger&);
-    // А их зачем friend, там всё равно скорее всего не используется ничего приватного
-    friend BigInteger operator*(const BigInteger&,const BigInteger&);
-    friend BigInteger operator+(const BigInteger&,const BigInteger&);
-    
+    friend BigInteger operator*(const BigInteger&,const BigInteger&); //без этого почему-то не работают вызовы умножения внутри методов. Видимо надо было реализоввать методы вне класса, но я понял что так удобней только когда геометрию писал
     BigInteger() : sign(true){
         digits.push_back(0);
     }
-    
-    BigInteger(const BigInteger& num) : sign(num.sign){// Для этого есть конструктор копирования у vector, уже всё давно реализовано
-        for(auto it = num.digits.begin(); it != num.digits.end(); ++it){
-            digits.push_back(*it);
-        }
-    }
-    
     BigInteger(int value){
         int cpy = value;
         sign = value >= 0;
@@ -63,19 +57,14 @@ public:
         std::swap(sign, num.sign);
     }
 
-    // А почему он принимает обычный BigInt, а не const &? Это ведь Копирование!!! Короче переделай
-    BigInteger& operator+=(BigInteger num){
+
+    BigInteger& operator+=(const BigInteger& num){
         int remainder = 0; int a;
-        if((sign ? *this:-*this) < (num.sign ? num:-num)){// И здесь тоже копирование при вызове -num
-            swap(num);// И это тоже нельзя
-        }
         if(num.sign == sign) {
-            for (size_t i = 0; i < digits.size(); ++i) {
-                if(i >= num.digits.size()) {
-                    a = 0;
-                }
-                else
-                    a = num.digits.at(i);
+            for (size_t i = 0; i < std::max(digits.size(), num.digits.size()); ++i) {
+                a = (i >= num.digits.size()) ? 0:num.digits.at(i);
+                if(i >= digits.size())
+                    digits.push_back(0);
                 digits.at(i) += a + remainder;
                 remainder = digits.at(i) / rank;
                 digits.at(i) %= rank;
@@ -85,26 +74,35 @@ public:
             }
         }
         else{
-            for(size_t i = 0; i < digits.size(); ++i){
-                if(i >= num.digits.size()) {
-                    a = 0;
-                }
-                else
-                    a = num.digits.at(i);
-                digits.at(i) = mod(digits.at(i) - a - remainder);
-                remainder = (digits.at(i) + a + remainder) / rank;
+            int s1 = 1; // s1 - знак цифр в this
+            int s2 = -1; // знак цифр в num. С минусом будем брать цифры меньшего по модулю числа
+            if((sign ? *this:-*this) < (num.sign ? num:-num)){
+                s1 = -1;
+                s2 = 1;
+                sign = !sign;
             }
+            for(size_t i = 0; i < std::max(digits.size(), num.digits.size()); ++i){
+                a = (i >= num.digits.size()) ? 0:num.digits.at(i);
+                if(i >= digits.size())
+                    digits.push_back(0);
+                digits.at(i) = digits.at(i) * s1 + a * s2 - remainder;
+                remainder = digits.at(i) < 0? 1: 0;
+                digits.at(i) = mod(digits.at(i));
+            }
+
             removeZeros();
         }
         return *this;
     }
 
-    void setZeros(){// Даже боюсь спрашивать...
-        for(auto it = digits.begin(); it != digits.end(); ++it)
-            *it = 0;
-    }
-    
     BigInteger& operator*=(const BigInteger& num){
+        if(num == 1){
+            return *this;
+        }
+        if(num == -1){
+            sign = !sign;
+            return *this;
+        }
         BigInteger thisCopy = *this;
         int remainder = 0;
         digits.resize(thisCopy.digits.size() + num.digits.size() + 2);
@@ -126,7 +124,7 @@ public:
     }
 
     BigInteger& operator-=(const BigInteger& num){
-        *this += -num;// Тоже копирование, не катит
+        *this += -num;
         return *this;
     }
 
@@ -152,18 +150,6 @@ public:
         return copy;
     }
 
-
-
-    static BigInteger powRank(int n){
-        BigInteger res;
-        for(int i = 1; i <= n; ++i){
-            res.digits.push_back(0);
-        }
-        if(n >= 0)
-            res.digits.at(n) = 1;
-        return res;
-    }
-    // А ведь можно было просто (a*pow(10,precision)/num).toString и точку вставить, но ладно, так по идее быстрее, если явно считать
     std::string divide(const BigInteger& num, size_t presicion){
         std::string res = "";
         if(!*this || !num){
@@ -201,6 +187,21 @@ public:
         return res;
     }
 
+    void addZeros(size_t n){ // использовал это в матрицах, чтобы уравнивать длину числа при делении, и прошло по времени. До этого я просто умножал на 10^n и валилось
+        std::vector<int> copy = digits;
+        digits.resize(n + digits.size());
+        for(size_t i = 0; i < n; ++i)
+            digits[i] = 0;
+        for(size_t i = n; i < digits.size(); ++i)
+            digits[i] = copy[i - n];
+    }
+
+    void delZero(){
+        for(size_t i = 0; i < digits.size() - 1; ++i)
+            digits[i] = digits[i + 1];
+        digits.pop_back();
+    }
+
     BigInteger& operator/=(const BigInteger& x){
         bool resSign = x.sign == sign;
         BigInteger thisCopy = *this; thisCopy.sign = true;
@@ -211,30 +212,34 @@ public:
             sign = resSign;
             return *this;
         }
-        size_t zeros;
+        size_t zeros; BigInteger k;
         while(thisCopy >= num){
             zeros = thisCopy.digits.size() - num.digits.size();
-            if(thisCopy < num * powRank(zeros))
+            k = num; k.addZeros(zeros); // k = num с zeros нулями на конце
+            if(thisCopy < k) {
                 zeros--;
+                k.delZero();
+            }
             int l = 1, r = rank, m;
             while(l + 1 < r){
                 m = (l + r) / 2;
-                if(thisCopy < (m * num * powRank(zeros))){
+                if(thisCopy < (m * k)){
                     r = m;
                 }
                 else{
                     l = m;
                 }
             }
-            thisCopy -= l * num * powRank(zeros);
-            *this += l * powRank(zeros);
+            thisCopy -= l * k;
+            BigInteger t(l);
+            t.addZeros(zeros);
+            *this += t;
         }
         sign = resSign;
         return *this;
     }
 
     BigInteger& operator%=(const BigInteger& x){
-        // this = this - (this/x)*x
         bool resSign = sign;
         BigInteger thisCopy = *this; thisCopy.sign = true;
         BigInteger num = x; num.sign = true;
@@ -242,22 +247,25 @@ public:
             sign = resSign;
             return *this;
         }
-        size_t zeros;
+        size_t zeros; BigInteger k;
         while(thisCopy >= num){
             zeros = thisCopy.digits.size() - num.digits.size();
-            if(thisCopy < num * powRank(zeros))
-                zeros--;
+            k = num; k.addZeros(zeros); // k = num с zeros нулями на конце
+            if(thisCopy < k) {
+                //zeros--;
+                k.delZero();
+            }
             int l = 1, r = rank, m;
             while(l + 1 < r){
                 m = (l + r) / 2;
-                if(thisCopy < (m * num * powRank(zeros))){
+                if(thisCopy < (m * k)){
                     r = m;
                 }
                 else{
                     l = m;
                 }
             }
-            thisCopy -= l * num * powRank(zeros);
+            thisCopy -= l * k;
         }
         *this = thisCopy;
         sign = resSign;
@@ -285,7 +293,6 @@ public:
     explicit operator bool() const
     {
         return digits.at(digits.size() - 1) != 0;
-        // Лучше заодно проверить что массив из 1 элемента... так на всякий
     }
 
     BigInteger operator-() const {
@@ -294,13 +301,6 @@ public:
         return copy;
     }
 
-    bool getSign() const{// Это метод должен быть private
-        return sign;
-    }
-
-    void setSign(bool s){// А этот так тем более. Для этой цели можно перегрузить *=-1
-        sign = s;
-    }
 
 };
 
@@ -427,19 +427,19 @@ private:
         return gcd(b, a % b);
     }
     void setSign(){
-        if(numerator.getSign() == denumerator.getSign() || !numerator || !denumerator) {
-            numerator.setSign(true);// *=-1
-            denumerator.setSign(true);
+        if((numerator < 0 && denumerator < 0) || (numerator > 0 && denumerator > 0) || !numerator || !denumerator) {
+            numerator *= (numerator < 0) ? -1: 1;
+
         }
         else{
-            numerator.setSign(false);
-            denumerator.setSign(true);
+            numerator *= (numerator > 0) ? -1: 1;
         }
+        denumerator *= (denumerator < 0) ? -1: 1;
     }
     void cutBack(){
         setSign();
         BigInteger nod;
-        if(numerator.getSign())
+        if(numerator >= 0)
             nod = gcd(numerator, denumerator);
         else
             nod = gcd(-numerator, denumerator);
@@ -500,22 +500,21 @@ public:
             res << "/" << denumerator.toString();
         return res.str();
     }
-    // Как и в прошлый раз numerator*pow(10,precision)/denumerator. Причём у тебя уже реализована такая функция, зачем ещё раз и по другому?
     std::string asDecimal(size_t precision = 0) const{
         std::stringstream res;
         if(precision == 0){
-            if((numerator / denumerator) || numerator.getSign() || !numerator)
+            if((numerator / denumerator) || numerator >= 0 || !numerator)
                 res << (numerator/denumerator).toString();
             else
                 res << "-" << (numerator/denumerator).toString();
             return  res.str();
         }
-        if((numerator / denumerator) || numerator.getSign() || !numerator)
+        if((numerator / denumerator) || numerator>= 0 || !numerator)
             res << (numerator/denumerator).toString() << ".";
         else
             res << "-" << (numerator/denumerator).toString() << ".";
         std::string s;
-        if(numerator.getSign())
+        if(numerator >= 0)
             s =(numerator%denumerator).divide(denumerator, precision / 4 + !(precision % 4 == 0));
         else
             s =((-numerator)%denumerator).divide(denumerator, precision / 4 + !(precision % 4 == 0));
@@ -529,7 +528,7 @@ public:
     }
     Rational operator-() const{
         Rational res = *this;
-        res.numerator.setSign(!res.numerator.getSign());
+        res.numerator *= -1;
         return res;
     }
 };
