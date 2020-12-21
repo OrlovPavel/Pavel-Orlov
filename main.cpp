@@ -25,7 +25,6 @@ public:
 
 SegmentTree::SegmentTree(size_t size) : size(size), sum(0){
 }
-
 void SegmentTree::setValue(size_t pos, long long value){
     if(size == 1){
         sum += value;
