@@ -124,7 +124,7 @@ public:
     }
 
     BigInteger& operator-=(const BigInteger& num){
-        *this += -num;
+        *this += -num;// Нагло, даже очень. Но ладно
         return *this;
     }
 
