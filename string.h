@@ -22,6 +22,7 @@ private:
         delete[] str;
         str = copy;
     }
+    
 public:
     String(){
         size = 0;
