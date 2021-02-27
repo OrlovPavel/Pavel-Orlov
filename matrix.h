@@ -647,7 +647,9 @@ public:
     Finite inverted() const;
     long long getValue() const;
     long long toString() const; //костылечек для вывода матрицы для дебага, просто в Rational тоже есть такой метод
+    // Вместе с ним было бы круто ещё перегрузить ostream, тогда было бы ещё удобнее... и логичнее
 
+    // Зачем их делать friend? Они ведь внутри класса определены
     friend Finite<N> operator+(const Finite<N>& x1, const Finite<N>& x2) {
         Finite<N> copy = x1;
         copy += x2;
