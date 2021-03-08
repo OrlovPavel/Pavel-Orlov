@@ -47,7 +47,7 @@ int main() {
         Chain* c = chains[i];
         while(c != nullptr){
             if(isEqual(name, c->name)){
-                f = true;
+                f = true; // нужно использовать понятные имена переменных, а не однобуквенные
                 c->value += value;
                 break;
             }
@@ -56,7 +56,7 @@ int main() {
             }
         }
         if(!f){
-            c = new Chain;
+            c = new Chain; // эта память не освобождается
             c->value += value;
             c->name = name;
             c->next = chains[i];
