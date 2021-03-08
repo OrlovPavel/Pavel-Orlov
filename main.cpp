@@ -53,7 +53,7 @@ public:
             }
         }
         if(!f){
-            c = new Chain;
+            c = new Chain; // память освобождается только при удалении элемента, но не в деструкторе
             c->value = y;
             c->name = x;
             c->next = chains[i];
@@ -68,7 +68,7 @@ public:
             return;
         if(isEqual(x, c->name)){
             if(c->next){
-                Chain* d = c->next;
+                Chain* d = c->next; // однобуквенные имена переменных
                 *c = *c->next;
                 delete d;
                 return;
@@ -124,7 +124,7 @@ int main() {
     MyArray arr;
     while (std::cin >> q){
         std::cin >> name;
-        if(q[0] == 'p'){
+        if(q[0] == 'p'){// зачем проверять только первую букву? Это дает возможность использовать некорректную команду и это усложняет чтение кода.
             std::cin >> value;
             arr.insert(name, value);
         }
