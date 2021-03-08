@@ -49,7 +49,7 @@ public:
             }
         }
         if(!f){
-            c = new Chain;
+            c = new Chain; // память не освобождается
             c->value = value;
             c->key = key;
             c->next = chains[i];
@@ -118,13 +118,13 @@ int main() {
     MyArray arr;
     for(int i = 0; i < n; ++i){
         std::cin >> x >> y;
-        i1 = arr.find(x);
+        i1 = arr.find(x); // однобуквенные имена переменных
         i2 = arr.find(y);
         if(i1 < 0)
             i1 = x - 1;
         if(i2 < 0)
             i2 = y - 1;
-        std::cout << (i2 > i1 ? i2 - i1: i1 - i2) << "\n";
+        std::cout << (i2 > i1 ? i2 - i1: i1 - i2) << "\n"; // можно было использовать функцию abs
         arr.insert(x, i2);
         arr.insert(y, i1);
     }
