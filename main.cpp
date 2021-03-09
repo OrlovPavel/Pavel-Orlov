@@ -10,6 +10,11 @@ struct Chain{
     long long key;
     long long value;
     Chain* next = nullptr;
+    ~Chain(){
+        if(next){
+            delete next;
+        }
+    };
 };
 
 long long mod(long long x){
@@ -49,7 +54,7 @@ public:
             }
         }
         if(!f){
-            c = new Chain; // память не освобождается
+            c = new Chain;
             c->value = value;
             c->key = key;
             c->next = chains[i];
@@ -112,21 +117,22 @@ int main() {
     std::cin.tie(0);
     std::cout.tie(0);
 
-    int n; int x, y;
-    int i1, i2;
+    int n;
+    int x, y; //аргументы операции swap
+    int index1, index2; //номера первого и второго аргумента операции swap в списке
     std::cin >> n;
     MyArray arr;
     for(int i = 0; i < n; ++i){
         std::cin >> x >> y;
-        i1 = arr.find(x); // однобуквенные имена переменных
-        i2 = arr.find(y);
-        if(i1 < 0)
-            i1 = x - 1;
-        if(i2 < 0)
-            i2 = y - 1;
-        std::cout << (i2 > i1 ? i2 - i1: i1 - i2) << "\n"; // можно было использовать функцию abs
-        arr.insert(x, i2);
-        arr.insert(y, i1);
+        index1 = arr.find(x);
+        index2 = arr.find(y);
+        if(index1 < 0)
+            index1 = x - 1;
+        if(index2 < 0)
+            index2 = y - 1;
+        std::cout << std::abs(index1 - index2) << "\n";
+        arr.insert(x, index2);
+        arr.insert(y, index1);
     }
     return 0;
 }
