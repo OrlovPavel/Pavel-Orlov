@@ -10,6 +10,11 @@ struct Chain{
     std::string name;
     std::string value;
     Chain* next = nullptr;
+    ~Chain(){
+        if(next){
+            delete next;
+        }
+    }
 };
 
 long long mod(long long x){
@@ -53,7 +58,7 @@ public:
             }
         }
         if(!f){
-            c = new Chain; // память освобождается только при удалении элемента, но не в деструкторе
+            c = new Chain;
             c->value = y;
             c->name = x;
             c->next = chains[i];
@@ -68,9 +73,10 @@ public:
             return;
         if(isEqual(x, c->name)){
             if(c->next){
-                Chain* d = c->next; // однобуквенные имена переменных
+                Chain* copy = c->next;
                 *c = *c->next;
-                delete d;
+                copy->next = nullptr;
+                delete copy;
                 return;
             }
             else{
@@ -124,14 +130,14 @@ int main() {
     MyArray arr;
     while (std::cin >> q){
         std::cin >> name;
-        if(q[0] == 'p'){// зачем проверять только первую букву? Это дает возможность использовать некорректную команду и это усложняет чтение кода.
+        if(q == "put"){
             std::cin >> value;
             arr.insert(name, value);
         }
-        if(q[0] == 'd'){
+        if(q == "delete"){
             arr.erase(name);
         }
-        if(q[0] == 'g'){
+        if(q == "get"){
             arr.find(name);
         }
     }
