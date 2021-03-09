@@ -10,7 +10,7 @@ int main() {
     int n, m; int x, y; int k = 0;
     std::cin >> n >> m;
     std::vector<std::vector<int> > vertex(n);
-    std::vector<std::unordered_set<int> > svertex(n);
+    std::vector<std::unordered_set<int> > svertex(n);  // Во всех заданиях из этого раздела нужно было реализовать свою хеш таблицу, нельзя использовать unordered_set
     for(int i = 0; i < m; ++i){
         std::cin >> x >> y; --x; --y;
         vertex[x].push_back(y);
