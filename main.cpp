@@ -10,6 +10,10 @@ struct Chain{
     long long value = 0;
     std::string name;
     Chain* next = nullptr;
+    ~Chain(){
+        if(!next)
+            delete next;
+    }
 };
 
 long long mod(long long x){
@@ -40,14 +44,14 @@ int main() {
     std::cout.tie(0);
     std::vector<Chain*> chains(m, nullptr);
     std::string name; long long value; long long i;
-    while (std::cin >> name){
+    while(std::cin >> name){
         std::cin >> value;
         i = hash(name);
-        bool f = false;
+        bool name_in_Chain = false;
         Chain* c = chains[i];
         while(c != nullptr){
             if(isEqual(name, c->name)){
-                f = true; // нужно использовать понятные имена переменных, а не однобуквенные
+                name_in_Chain = true;
                 c->value += value;
                 break;
             }
@@ -55,8 +59,8 @@ int main() {
                 c = c->next;
             }
         }
-        if(!f){
-            c = new Chain; // эта память не освобождается
+        if(!name_in_Chain){
+            c = new Chain;
             c->value += value;
             c->name = name;
             c->next = chains[i];
@@ -64,5 +68,7 @@ int main() {
         }
         std::cout << c->value << "\n";
     }
+    for(int j = 0; j < m; ++j)
+        delete chains[i];
     return 0;
 }
