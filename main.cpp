@@ -3,7 +3,7 @@
 
 const int INF = 2147483647;
 
-int main() {
+int main() { // вся функциональность в main
     int n;
     std::cin >> n;
     int* a = new int[n];
