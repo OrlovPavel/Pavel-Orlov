@@ -6,7 +6,7 @@ const int INF = 2147483647;
 int main() { // вся функциональность в main
     int n;
     std::cin >> n;
-    int* a = new int[n];
+    int* a = new int[n]; // выделенная память не освобождается
     int* dp = new int[n + 1];
     int* p = new int[n + 1];
     int* prev = new int[n];
