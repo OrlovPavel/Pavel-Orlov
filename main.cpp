@@ -1,9 +1,9 @@
 #include <iostream>
 
-int main() {
+int main() { // вся функциональность в main
     int n, m;
     std::cin >> n >> m;
-    int* a = new int[n];
+    int* a = new int[n]; // память не освобождается
     int* b = new int[m];
     for(int i = 0; i < n; ++i){
         std::cin >> a[i];
