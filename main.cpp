@@ -1,17 +1,15 @@
 #include <iostream>
 
-int main() { // вся функциональность в main
-    int n, m;
-    std::cin >> n >> m;
-    int* a = new int[n]; // память не освобождается
-    int* b = new int[m];
+void insert(int& n, int& m, int* a, int* b){
     for(int i = 0; i < n; ++i){
         std::cin >> a[i];
     }
     for(int i = 0; i < m; ++i){
         std::cin >> b[i];
     }
-    int** dp = new int*[n];
+}
+
+void fill_dp(int& n, int& m, int* a, int* b, int** dp){
     for(int i = 0; i < n; ++i){
         dp[i] = new int[m];
     }
@@ -21,7 +19,6 @@ int main() { // вся функциональность в main
         else
             dp[0][j] = 0;
     }
-
     for(int i = 1; i < n; ++i){
         int maxL = 0; //длина максималньой подпоследовательности с концом < a[i]
         for(int j = 0; j < m; ++j) {
@@ -32,11 +29,35 @@ int main() { // вся функциональность в main
                 maxL = dp[i][j];
         }
     }
+}
+
+int find_ans(int& n, int& m, int** dp){
     int ans = 0;
     for(int j = 0; j < m; ++j){
         if(dp[n - 1][j] > ans)
             ans = dp[n - 1][j];
     }
-    std::cout << ans;
+    return ans;
+}
+
+void free_memory(int* a, int* b, int& n, int** dp){
+    delete[] a;
+    delete[] b;
+    for(int i = 0; i < n; ++i){
+        delete[] dp[i];
+    }
+    delete[] dp;
+}
+
+int main() {
+    int n, m;
+    std::cin >> n >> m;
+    int* a = new int[n];
+    int* b = new int[m];
+    insert(n, m, a, b);
+    int** dp = new int*[n];
+    fill_dp(n, m, a, b, dp);
+    std::cout << find_ans(n, m, dp);
+    free_memory(a, b, n, dp);
     return 0;
 }
