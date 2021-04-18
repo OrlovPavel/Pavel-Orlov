@@ -3,20 +3,16 @@
 
 const int INF = 2147483647;
 
-int main() { // вся функциональность в main
-    int n;
-    std::cin >> n;
-    int* a = new int[n]; // выделенная память не освобождается
-    int* dp = new int[n + 1];
-    int* p = new int[n + 1];
-    int* prev = new int[n];
-    dp[0] = INF; p[0] = INF;
+void insert(std::vector<int>& a, std::vector<int>& dp, std::vector<int>& p, std::vector<int>& prev){
+    int n = a.size();
     for(int i = 0; i < n; ++i){
         dp[i + 1] = -INF;
         std::cin >> a[i];
-        prev[i] = INF;
-        p[i + 1] = INF;
     }
+}
+
+void fill_dp(std::vector<int>& a, std::vector<int>& dp, std::vector<int>& p, std::vector<int>& prev){
+    int n = a.size();
     for(int i = 0; i < n; ++i){
         int l = 0, r = n + 1;
         while(l < r - 1){
@@ -33,6 +29,10 @@ int main() { // вся функциональность в main
         }
         //std::cout << r << " " << a[p[r]] <<"gh\n";
     }
+}
+
+void print_ans(std::vector<int>& dp, std::vector<int>& p, std::vector<int>& prev){
+    int n = prev.size();
     int ans = n;
     for(int i = n; dp[i] == -INF; --i){
         ans = i - 1;
@@ -47,5 +47,17 @@ int main() { // вся функциональность в main
     for(auto it = index.rbegin(); it != index.rend(); ++it){
         std::cout << *it + 1 << " ";
     }
+}
+
+int main() {
+    int n;
+    std::cin >> n;
+    std::vector<int> a(n);
+    std::vector<int> dp(n + 1, INF);
+    std::vector<int> p(n + 1, INF); // восстановление ответа
+    std::vector<int> prev(n, INF);
+    insert(a, dp, p, prev);
+    fill_dp(a, dp, p, prev);
+    print_ans(dp, p, prev);
     return 0;
 }
