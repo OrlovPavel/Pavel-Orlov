@@ -2,11 +2,11 @@
 #include <vector>
 const int INF = 1000000000;
 
-int main() {
+int main() { // все в main
     int n;
     std::cin >> n;
     int m = 1<<(n + 1);
-    int** way = new int*[n + 1];
+    int** way = new int*[n + 1]; // память не освобождается
     int** dp = new int*[n + 1];
     int** prev1 = new int*[n + 1];
     int** prev2 = new int*[n + 1];
