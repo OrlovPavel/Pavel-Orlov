@@ -113,7 +113,7 @@ std::istream& operator>>(std::istream& in, BigInteger& num){
 }
 
 
-size_t MOD;
+size_t MOD; // можно использовать только глобальные константы
 
 size_t mod(size_t a){
     return (MOD + a % MOD) % MOD;
