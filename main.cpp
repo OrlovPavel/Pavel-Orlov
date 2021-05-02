@@ -64,7 +64,7 @@ int main() {
     int n, m, a, b;
     std::cin >> n;
     Graph graph(n);
-    int root, v;
+    int root, v; // нужно инициализировать начальным значением
     for(int i = 0; i < n; ++i){
         std::cin >> v;
         if(v != 0)
