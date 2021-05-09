@@ -3,7 +3,7 @@
 #include <list>
 #include <ctime>
 
-int chtobi_zashlo1 = 0;
+int chtobi_zashlo1 = 0;// скрестим пальцы
 template<size_t chunkSize>
 class FixedAllocator{
 private:
@@ -76,7 +76,8 @@ public:
     using value_type = T;
 
     FastAllocator() = default;
-    FastAllocator(const FastAllocator<typename std::remove_pointer<T>::type>& other):/*byte24(other.byte24)*/ byte16(other.byte16), byte8(other.byte8) /*byte4(other.byte4)*/{}
+    FastAllocator(const FastAllocator<typename std::remove_pointer<T>::type>& other):\
+    /*byte24(other.byte24)*/ byte16(other.byte16), byte8(other.byte8) /*byte4(other.byte4)*/{}
 
     T* allocate(size_t n){
         //if(n * sizeof(T) == 24)
@@ -166,12 +167,14 @@ public:
         using difference_type = int;
         using pointer = conditionalPtr;
         using reference = conditionalReference;
+
         friend List;
-        friend template_iterator<true>;
+        friend template_iterator<true>;// Эмм?
         friend template_iterator<false>;
     private:
         Node* current = nullptr;
     public:
+        // Копирование лучше делать из самого себя, а к другому итератору (константному) кастовать
         template_iterator(const template_iterator<false>& other):current(other.current){}
         explicit template_iterator(Node* node) : current(node){}
         template_iterator& operator++(){
@@ -325,7 +328,7 @@ List<T, Allocator>::List(size_t count, const T &value, const Allocator &) : sz(c
 }
 
 template<typename T, typename Allocator>
-List<T, Allocator>::List(size_t count) : sz(count), alloc(Alloc()){
+List<T, Allocator>::List(size_t count) : sz(count), alloc(Alloc()){// Здесь по факту так же следует принимать аллокатор снаружи
     first = AllocTraits::allocate(alloc, 1);
     first->prev = nullptr;
     Node* current = nullptr;
