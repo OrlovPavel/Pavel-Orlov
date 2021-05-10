@@ -40,14 +40,14 @@ public:
 
     template<bool isConst>
     struct template_iterator{
-        using conditionalPtr = typename std::conditional<isConst, const T*, T*>::type;// Это и должен быть pointer, ты ведь вместе с итератором должен его внутренние типы менять
-        using conditionalReference = typename std::conditional<isConst, const T&, T&>::type;// Аналогично
+        using conditionalPtr = typename std::conditional<isConst, const T*, T*>::type;
+        using conditionalReference = typename std::conditional<isConst, const T&, T&>::type;
         using iteratorType = typename std::vector<T*>::const_iterator;
         using iterator_category = std::random_access_iterator_tag;
-        using value_type = T; // Здесь так же следовало бы добавить условие на константу
+        using value_type = typename std::conditional<isConst, const T, T>::type;
         using difference_type = int;
-        using pointer = T*;
-        using reference = T&;
+        using pointer = typename std::conditional<isConst, const T*, T*>::type;
+        using reference = typename std::conditional<isConst, const T&, T&>::type;
     private:
         iteratorType bucketIndex;
         int elemIndex = 0;
@@ -333,20 +333,30 @@ Deque<T>::Deque() : buckets(std::vector<T*>(3, nullptr)), sz(0){
 }
 
 template<typename T>
-Deque<T>::Deque(size_t n, const T& value) : buckets(std::vector<T*>((n / bucket_size + 1) * 3, nullptr)), sz(n){
+Deque<T>::Deque(size_t n, const T& value) : buckets(std::vector<T*>((n / bucket_size + 1) * 3, nullptr)), sz(n) {
     front_coord.first = back_coord.first = buckets.size() / 3;
     front_coord.second = back_coord.second = 0;
-    for(size_t i = 0; i < n;){
-        buckets[back_coord.first] = AllocTraits::allocate(alloc, bucket_size);
-        size_t j = 0;
-        for(; j < bucket_size && i < n; ++j, ++i){
-            // construct не является noexcept, по этому здесь так же следует проводить проверку на успех построения и откатывать изменения. -10%
-            AllocTraits::construct(alloc, buckets[back_coord.first]+j, value);
+    size_t i = 0, j = 0;
+    try {
+        for (i = 0; i < n;) {
+            buckets[back_coord.first] = AllocTraits::allocate(alloc, bucket_size);
+            for (j = 0; j < bucket_size && i < n; ++j, ++i) {
+                AllocTraits::construct(alloc, buckets[back_coord.first] + j, value);
+            }
+            if (i < n)
+                ++back_coord.first;
+            else
+                back_coord.second = j - 1;
         }
-        if(i < n)
-            ++back_coord.first;
-        else
-            back_coord.second = j - 1;
+    }
+    catch(...){
+        for(size_t g = 0; g <= i;){
+            for(size_t k = 0; k < bucket_size && g < i; ++g, ++k){
+                AllocTraits::destroy(alloc, buckets[front_coord.first] + g);
+            }
+            AllocTraits::deallocate(alloc, buckets[front_coord.first], bucket_size);
+            ++front_coord.first;
+        }
     }
 }
 
@@ -357,8 +367,7 @@ Deque<T>::Deque(const Deque<T>& deq): front_coord(deq.front_coord), back_coord(d
     try {
         for (; i <= back_coord.first; ++i) {
             buckets[i] = AllocTraits::allocate(alloc, bucket_size);
-            // move? Ты уверен, что не спутал с copy?
-            std::uninitialized_move(deq.buckets[i], deq.buckets[i]+bucket_size, buckets[i]);
+            std::uninitialized_copy(deq.buckets[i], deq.buckets[i]+bucket_size, buckets[i]);
         }
     }
     catch(...){
@@ -385,8 +394,7 @@ Deque<T>& Deque<T>::operator=(const Deque<T>& deq) {
         buckets.reserve(deq.buckets.size());
         for(; i <= back_coord.first; ++i){
             buckets[i] = AllocTraits::allocate(alloc, bucket_size);
-            // Видимо не спутал. Поправь -5%
-            std::uninitialized_move(deq.buckets[i], deq.buckets[i]+bucket_size, buckets[i]);
+            std::uninitialized_copy(deq.buckets[i], deq.buckets[i]+bucket_size, buckets[i]);
         }
     }
     catch(...){
@@ -440,8 +448,12 @@ void Deque<T>::push_back(const T& value) {
         back_coord.second = 0;
     }
     ++sz;
-    // Аналогично, в случае не успеха следует --sz делать
-    AllocTraits::construct(alloc, buckets[back_coord.first]+back_coord.second, value);
+    try {
+        AllocTraits::construct(alloc, buckets[back_coord.first] + back_coord.second, value);
+    }
+    catch(...){
+        --sz;
+    }
 }
 
 template<typename T>
@@ -457,8 +469,12 @@ void Deque<T>::push_front(const T& value) {
         front_coord.second = bucket_size - 1;
     }
     ++sz;
-    // И тут
-    AllocTraits::construct(alloc, buckets[front_coord.first]+front_coord.second, value);
+    try {
+        AllocTraits::construct(alloc, buckets[front_coord.first] + front_coord.second, value);
+    }
+    catch(...){
+        --sz;
+    }
 }
 
 template<typename T>
