@@ -176,7 +176,8 @@ public:
     }
 
     void insert(iterator it, const T &value) {
-        Node *node = new Node;
+        Node *node = new Node;// Нельзя использовать в данном моменте new, для этого есть аллокатор. Просто выдели всю память
+        // для ноды сразу через алоцирование, а конструируй только для value
         node->value = AllocTraits::allocate(alloc, 1);
         AllocTraits::construct(alloc, node->value, value);
         node->next = it.current;
@@ -188,7 +189,7 @@ public:
     }
 
     void insert(const_iterator it, const T &value) {
-        Node *node = new Node;
+        Node *node = new Node;// Аналогично
         node->value = AllocTraits::allocate(alloc, 1);
         AllocTraits::construct(alloc, node->value, value);
         node->next = it.current;
@@ -727,7 +728,7 @@ UnorderedMap<Key, Value, Hash, Equal, Alloc> &UnorderedMap<Key, Value, Hash, Equ
 }
 
 template<typename Key, typename Value, typename Hash, typename Equal, typename Alloc>
-Value &UnorderedMap<Key, Value, Hash, Equal, Alloc>::operator[](const Key &key) {
+Value &UnorderedMap<Key, Value, Hash, Equal, Alloc>::operator[](const Key &key) {// Много кода повторяется... можно было бы выделить
     size_t i = hash_func(key) % buckets.size();
     if(buckets[i]) {
         for (auto it = buckets[i]->chain.begin(); it != buckets[i]->chain.end(); ++it) {
@@ -784,7 +785,8 @@ Value &UnorderedMap<Key, Value, Hash, Equal, Alloc>::operator[](Key &&key) {
 
 
 template<typename Key, typename Value, typename Hash, typename Equal, typename Alloc>
-Value &UnorderedMap<Key, Value, Hash, Equal, Alloc>::at(const Key &key) const {
+Value &UnorderedMap<Key, Value, Hash, Equal, Alloc>::at(const Key &key) const {// Какая то каша, не const элемент возвращается
+// в const методе. По идее их 2 должно быть, один const ...at() const, второй просто at
     size_t i = hash_func(key) % buckets.size();
     if(buckets[i]){
         for (auto it = buckets[i]->chain.begin(); it != buckets[i]->chain.end(); ++it) {
@@ -1022,11 +1024,3 @@ UnorderedMap<Key, Value, Hash, Equal, Alloc>::~UnorderedMap() {
     BucketAllocTraits::deallocate(bucket_alloc, first, 1);
     BucketAllocTraits::deallocate(bucket_alloc, last, 1);
 }
-
-
-
-
-
-
-
-
