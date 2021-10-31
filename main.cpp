@@ -2,8 +2,8 @@
 #include <string>
 #include <set>
 #include <vector>
-
-std::pair<std::multiset<std::string>, std::vector<std::string>> fill_words_points(const std::string& s){
+// Нужно было реализовать с помощью бора - работает за О(длина текста), std::multiset, если я не ошибаюсь, использует binary search tree и поиск О(klogk), k - число слов
+std::pair<std::multiset<std::string>, std::vector<std::string>> fill_words_points(const std::string& s){ // тип возвращаемого значения - очень сложный, лучше было в виде класса оформить
     std::string word;
     std::multiset<std::string> words;
     std::vector<std::string> points(1, "");
@@ -13,7 +13,7 @@ std::pair<std::multiset<std::string>, std::vector<std::string>> fill_words_point
         points[0] += '.';
         ++i;
     }
-    for(; i != s.size(); ++i){
+    for(; i != s.size(); ++i){ // лучше писать < s.size()
         if(s[i] == '.'){
             points[points.size() - 1] += '.';
             if(f) {
