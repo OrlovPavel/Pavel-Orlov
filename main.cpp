@@ -1,23 +1,67 @@
 #include <iostream>
-#include <string>
-#include <set>
 #include <vector>
-// Нужно было реализовать с помощью бора - работает за О(длина текста), std::multiset, если я не ошибаюсь, использует binary search tree и поиск О(klogk), k - число слов
-std::pair<std::multiset<std::string>, std::vector<std::string>> fill_words_points(const std::string& s){ // тип возвращаемого значения - очень сложный, лучше было в виде класса оформить
+#include <string>
+
+const int ABC = 26;
+const char FIRST = 97;
+
+class Bor{
+    struct Node{
+        std::vector<int> to = std::vector<int>(ABC, -1);
+        int number = 0;
+        int depth = 0;
+    };
+    std::vector<Node> trie = std::vector<Node>(1);
+    int sz = 0;
+public:
+    void add(const std::string& s){
+        int v = 0;
+        for(auto it = s.begin(); it != s.end(); ++it){
+            int c = *it - FIRST;
+            if(trie[v].to[c] == -1){
+                trie.emplace_back(Node());
+                trie[trie.size() - 1].depth = trie[v].depth + 1;
+                trie[v].to[c] = trie.size() - 1;
+            }
+            v = trie[v].to[c];
+        }
+        ++trie[v].number;
+        ++sz;
+    }
+
+    void sort(std::vector<std::string>& sorted, std::string& word, int v = 0) {
+        if(v != 0) {
+            for(int i = 0; i < trie[v].number; ++i)
+                sorted.push_back(word);
+        }
+        for(char i = 0; i < trie[v].to.size(); ++i) {
+            char c = i + FIRST;
+            int to = trie[v].to[i];
+            if(to != -1) {
+                word += c;
+                sort(sorted, word, to);
+                word.pop_back();
+            }
+        }
+    }
+};
+int main() {
+    std::string s;
     std::string word;
-    std::multiset<std::string> words;
+    Bor words;
     std::vector<std::string> points(1, "");
     int i = 0;
     bool f = false;
+    std::cin >> s;
     while(s[i] == '.'){
         points[0] += '.';
         ++i;
     }
-    for(; i != s.size(); ++i){ // лучше писать < s.size()
+    for(; i != s.size(); ++i){
         if(s[i] == '.'){
             points[points.size() - 1] += '.';
             if(f) {
-                words.insert(word);
+                words.add(word);
                 f = false;
                 word = "";
             }
@@ -31,22 +75,17 @@ std::pair<std::multiset<std::string>, std::vector<std::string>> fill_words_point
         }
     }
     if(f) {
-        words.insert(word);
+        words.add(word);
     } else{
         points.emplace_back("");
     }
-    return std::make_pair(words, points);
-}
-
-int main() {
-    std::string s;
-    std::cin >> s;
-    auto pair = fill_words_points(s);
-    std::cout << pair.second[0];
-    int i = 1;
-    for(auto it = pair.first.begin(); it != pair.first.end(); ++it, ++i){
-        std::cout << *it;
-        std::cout << pair.second[i];
+    std::cout << points[0];
+    std::vector<std::string> sorted;
+    word = "";
+    words.sort(sorted, word);
+    for(int i = 1, j = 0; j < sorted.size(); ++i, ++j){
+        std::cout << sorted[j];
+        std::cout << points[i];
     }
     return 0;
 }
