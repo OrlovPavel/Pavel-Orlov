@@ -16,6 +16,10 @@ public:
         heap_size = 0;
     }
     
+    ~MyHeap() {
+        free(ptrs);   
+    }
+    
     void siftUp(int i){// Всё тоже - названия переменных
         while(i > 1 && heap[i] < heap[i / 2]){
             ptrs[heap[i].second] = i / 2;
